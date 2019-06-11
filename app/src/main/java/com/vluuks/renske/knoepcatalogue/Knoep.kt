@@ -8,7 +8,7 @@ import android.util.Log
  */
 
 // the constructor word can be omitted if there are no annotations or modifiers on the arguments
-class Knoep constructor(var name: String, var size: Int, var type: String, var uri: Uri?) {
+class Knoep constructor(var name: String, var size: Int, var type: String, var desc: String, var uri: Uri?) {
 
 //    private var name = ""
 //    private var size = ""

@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "ja of nee")
         Log.d(TAG, knoepList.toString())
 
+        val dbHelper = DatabaseHelper.getInstance(this)
         // the argument type and name are reversed, this is going to be confusing
 //        val aKnoep = Knoep("Vluuks", 30, "De kleinste knoep")
 //        knoepList.add(aKnoep)
@@ -32,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        listView.adapter = KnoepAdapter(this, R.layout.knoep_item, knoepList)
+        listView.adapter = KnoepAdapter(this, R.layout.knoep_item, DatabaseHelper.getInstance(this)!!.selectAllConvert())
 
 
     }
@@ -44,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onResume" + knoepList.toString())
 //      listView.deferNotifyDataSetChanged()
 
-        listView.adapter = KnoepAdapter(this, R.layout.knoep_item, knoepList)
+        listView.adapter = KnoepAdapter(this, R.layout.knoep_item, DatabaseHelper.getInstance(this)!!.selectAllConvert())
     }
 }
 

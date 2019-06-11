@@ -6,7 +6,9 @@
 
 package knoeps
 
+import com.vluuks.renske.knoepcatalogue.DatabaseHelper
 import com.vluuks.renske.knoepcatalogue.Knoep
 
 var knoepList = ArrayList<Knoep>()
 var TAG = "KNOEPTEST"
+//var dbHelper = DatabaseHelper

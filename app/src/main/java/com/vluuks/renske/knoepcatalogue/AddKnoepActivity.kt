@@ -46,7 +46,11 @@ class AddKnoepActivity : AppCompatActivity() {
         if(verify() && checkPermissions()) {
 
             Log.d(TAG, selectedImage.toString())
-            val aKnoep = Knoep(nameET.text.toString(), sizeET.text.toString().toInt(), typeET.text.toString(), selectedImage)
+
+            val aKnoep = Knoep(nameET.text.toString(), sizeET.text.toString().toInt(), typeET.text.toString(), "test", selectedImage)
+            val databaseHelper = DatabaseHelper.getInstance(this)
+            databaseHelper?.insert(aKnoep)
+
             // why you cannot go from editable to int as well? now we need an ugly double cast
             knoepList.add(aKnoep)
 
