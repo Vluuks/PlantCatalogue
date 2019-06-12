@@ -15,17 +15,25 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_add_knoep.*
 import knoeps.*
 
-
+/*
+    This activity is used to add a new entry to the database. Users can fill in the fields that are
+    required of an entry, select an image and then confirm the contents to add it to the database,
+    after which they will be returned to the MainActivity.
+ */
 class AddKnoepActivity : AppCompatActivity() {
 
+    // Request codes for permissions and image selection
     val GALLERY_REQUEST_CODE = 184
     val PERMISSION_REQUEST_STORAGE = 123
 
-    // ref to image selected, this is probably not the way to go but I can't think of something else
+    // Ref to the selected image's URI
+    // (this is probably not the way to go but I can't think of something else for now)
     var selectedImage: Uri? = null
 
-
-    // oncreate etc as usual
+    /*
+        Usual business of onCreate. Setting listeners here but defining contents elsewhere
+        seems to be the most elegant and avoid bulk?
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_knoep)
@@ -40,79 +48,80 @@ class AddKnoepActivity : AppCompatActivity() {
         }
     }
 
+
+    /*
+        Obtains information from the fields and adds it to the database. If there are empty fields
+        or missing permissions, the user will be notified.
+     */
     fun addKnoep() {
 
-        // if there is content
+        // Verify contents and permissions
         if(verify() && checkPermissions()) {
 
-            Log.d(TAG, selectedImage.toString())
-
+            // Create object and insert into database
             val aKnoep = Knoep(nameET.text.toString(), sizeET.text.toString().toInt(), typeET.text.toString(), "test", selectedImage)
             val databaseHelper = DatabaseHelper.getInstance(this)
             databaseHelper?.insert(aKnoep)
 
-            // why you cannot go from editable to int as well? now we need an ugly double cast
-            knoepList.add(aKnoep)
-
-            Log.d(TAG, knoepList.toString())
-
-            // close this activity
+            // Close this activity
             finish()
         }
     }
 
+
+    /*
+        Checks for the necessary permissions, in this case reading of the external storage.
+     */
     fun checkPermissions(): Boolean {
 
+        // Permissions are missing
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-
-            Log.d("Requesting", "no permissions")
 
             ActivityCompat.requestPermissions(this,
                     arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
                     PERMISSION_REQUEST_STORAGE)
 
             return false
-
         }
-        Log.d("Requesting", "yes permissions")
 
         return true
 
     }
 
 
-    // Callback from permission request
+    /*
+        Callback from permission request.
+    */
     override fun onRequestPermissionsResult(requestCode: Int,
                                             permissions: Array<String>, grantResults: IntArray) {
+        // Appears to be some kind of anonymous function like structure?
         when (requestCode) {
             PERMISSION_REQUEST_STORAGE -> {
 
                 Log.d("Requesting", "asked" +  requestCode.toString())
                 Log.d("Requesting", "got" + grantResults[0].toString())
 
-                // If request is cancelled, the result arrays are empty.
+                // If there is a code and it's the right one, continue with adding the entry
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     Log.d("Requesting", "success")
                     addKnoep()
 
-                } else {
+                }
+                // Otherwise, stop this activity because a photo is required
+                else {
                     Log.d("Requesting", "failed")
                     finish()
                 }
                 return
             }
-
-        // Add other 'when' lines to check for other
-        // permissions this app might request.
-            else -> {
-                // Ignore all other requests.
-            }
         }
     }
 
 
-    // checks the contents of the edittexts
+    /*
+        Checks whether all fields have been filled in and a photo is selected.
+     */
     fun verify(): Boolean {
 
         if(nameET.text.toString().trim().isEmpty() ||
@@ -126,37 +135,44 @@ class AddKnoepActivity : AppCompatActivity() {
         return true
     }
 
+
+    /*
+        Creates an intent that opens the gallery or other photo selector app of the user's choice
+        to pick a photo that will be added to the entry.
+     */
     fun selectPhoto() {
 
-        // make intent and say that we want it to pick images
+        // Make intent and say that we want it to pick images
         var intent = Intent(Intent.ACTION_PICK)
         intent.setType("image/*")
 
-        // specifiy types of images
+        // Specifiy types of images
         var mimeTypes = arrayOf("image/jpeg", "image/png")
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
 
-        // launch intent with for result, ensuring callback
+        // Launch intent with for result, then wait for callback
         startActivityForResult(intent, GALLERY_REQUEST_CODE)
     }
 
 
-    // callback function when image is picked
+    /*
+        Callback for the photo select request, will be executed when the user returns from
+        selecting a photo.
+     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        // initial check
+        // Initial check
         if (resultCode == Activity.RESULT_OK) {
 
-            // check if the right code was received (switch died in kotlin)
+            // Check if the right code was received (switch died in kotlin)
             if (requestCode == GALLERY_REQUEST_CODE) {
 
-                // not 100% on the syntax
+                // Hold a reference to this URI so we can add it to the entry later
                 selectedImage = data?.data
+
+                // Set image to the button so user can see what they picked
                 selectKnoepButton.setImageURI(selectedImage)
-                Log.d(TAG, selectedImage.toString())
-
-
             }
         }
     }
